@@ -52,10 +52,7 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
         bool useEven
   */
   const contract2 = await factory2.deploy(
-    '0x3963341dad121c9CD33046089395D66eBF20Fb03',
-    '0x0000c304D2934c00Db1d51995b9f6996AffD17c0',
-    '0x301ED39771d8f1dD0b05F8C2D4327ce9C426E783',
-    false
+    `${systemContract}`
   );
   await contract2.deployed();
 
@@ -82,9 +79,7 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   const contract4 = await factory4.deploy(
     `${contract3.address}`,
     `${contract2.address}`,
-    '0x3963341dad121c9CD33046089395D66eBF20Fb03',
-    '0x0000c304D2934c00Db1d51995b9f6996AffD17c0',
-    '0x301ED39771d8f1dD0b05F8C2D4327ce9C426E783',
+    `${systemContract}`
   );
   await contract4.deployed();
 
@@ -97,7 +92,7 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   const contract5 = await factory5.deploy(
     `${contract4.address}`,
     chainID,
-    systemContract
+    `${systemContract}`
   );
   await contract5.deployed();
 

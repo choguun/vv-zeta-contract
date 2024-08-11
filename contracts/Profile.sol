@@ -1,122 +1,88 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.7;
 
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-// import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@zetachain/protocol-contracts/contracts/evm/tools/ZetaInteractor.sol";
-import "@zetachain/protocol-contracts/contracts/evm/interfaces/ZetaInterfaces.sol";
+import "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
+import "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@zetachain/toolkit/contracts/BytesHelperLib.sol";
+import "@zetachain/toolkit/contracts/OnlySystem.sol";
 
-contract Profile is ERC721, ZetaInteractor, ZetaReceiver {  
+contract Profile is zContract, ERC721, OnlySystem {
+    SystemContract public systemContract;
+    error CallerNotOwnerNotApproved();
+    uint256 constant BITCOIN = 18332;
+
+    mapping(uint256 => uint256) public tokenAmounts;
+    mapping(uint256 => uint256) public tokenChains;
     mapping(uint256 => string) public profileHandle; // tokenId => handle
     mapping(string => uint256) public handleToTokenId; // handle => tokenId
-
-    event CrossChainNFTEvent(address, uint256);
-    event CrossChainNFTRevertedEvent(address, uint256);
- 
-    ZetaTokenConsumer private immutable _zetaConsumer;
-    IERC20 internal immutable _zetaToken;
-    uint256 private _tokenIds;
-
     // Mapping from owner to list of owned token IDs
     mapping(address => uint256[]) private _ownedTokens;
-
     // Mapping from token ID to index of the owner tokens list
     mapping(uint256 => uint256) private _ownedTokensIndex;
-
     // Array with all token ids, used for enumeration
     uint256[] private _allTokens;
-
     // Mapping from token id to position in the allTokens array
     mapping(uint256 => uint256) private _allTokensIndex;
 
-    constructor(
-        address connectorAddress, // 0x3963341dad121c9CD33046089395D66eBF20Fb03
-        address zetaTokenAddress, // 0x0000c304D2934c00Db1d51995b9f6996AffD17c0
-        address zetaConsumerAddress, // 0x301ED39771d8f1dD0b05F8C2D4327ce9C426E783
-        bool useEven
-      ) 
-      ERC721("Profile", "Profile") 
-      ZetaInteractor(connectorAddress) {
-        _zetaToken = IERC20(zetaTokenAddress);
-        _zetaConsumer = ZetaTokenConsumer(zetaConsumerAddress);
+    uint256 private _nextTokenId;
 
-        _tokenIds++;
-        if (useEven) _tokenIds++;
+    constructor(address systemContractAddress) ERC721("Profile", "Profile") {
+        systemContract = SystemContract(systemContractAddress);
+        _nextTokenId = 0;
     }
 
-    function sendMessage(
-        uint256 destinationChainId,
-        address to,
-        uint256 token
-    ) external payable {
-        if (!_isValidChainId(destinationChainId))
-            revert InvalidDestinationChainId();
- 
-        uint256 crossChainGas = 2 * (10 ** 18);
-        uint256 zetaValueAndGas = _zetaConsumer.getZetaFromEth{
-            value: msg.value
-        }(address(this), crossChainGas);
-        _zetaToken.approve(address(connector), zetaValueAndGas);
- 
-        _burn(token);
- 
-        connector.send(
-            ZetaInterfaces.SendInput({
-                destinationChainId: destinationChainId,
-                destinationAddress: interactorsByChainId[destinationChainId],
-                destinationGasLimit: 300000,
-                message: abi.encode(to, token, msg.sender),
-                zetaValueAndGas: zetaValueAndGas,
-                zetaParams: abi.encode("")
-            })
+    function onCrossChainCall(
+        zContext calldata context,
+        address zrc20,
+        uint256 amount,
+        bytes calldata message
+    ) external override onlySystem(systemContract) {
+        address recipient;
+
+        if (context.chainID == BITCOIN) {
+            recipient = BytesHelperLib.bytesToAddress(message, 0);
+        } else {
+            recipient = abi.decode(message, (address));
+        }
+
+        _mintNFT(recipient, context.chainID, amount);
+    }
+
+    function _mintNFT(
+        address recipient,
+        uint256 chainId,
+        uint256 amount
+    ) private {
+        uint256 tokenId = _nextTokenId;
+        _safeMint(recipient, tokenId);
+        tokenChains[tokenId] = chainId;
+        tokenAmounts[tokenId] = amount;
+        _nextTokenId++;
+    }
+
+    function registerHandle(string memory username, uint256 chainId) external payable {
+        _mintNFT(msg.sender, chainId, 1);
+        handleToTokenId[username] = _nextTokenId - 1;
+        profileHandle[_nextTokenId-1] = username;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+    }
+
+    function burnNFT(uint256 tokenId, bytes memory recipient) public {
+        if (!_isApprovedOrOwner(_msgSender(), tokenId)) {
+            revert CallerNotOwnerNotApproved();
+        }
+        address zrc20 = systemContract.gasCoinZRC20ByChainId(
+            tokenChains[tokenId]
         );
-    }
- 
-    function onZetaMessage(
-        ZetaInterfaces.ZetaMessage calldata zetaMessage
-    ) external override isValidMessageCall(zetaMessage) {
-        (address to, uint256 token) = abi.decode(
-            zetaMessage.message,
-            (address, uint256)
-        );
- 
-        _safeMint(to, token);
- 
-        emit CrossChainNFTEvent(to, token);
-    }
- 
-    function onZetaRevert(
-        ZetaInterfaces.ZetaRevert calldata zetaRevert
-    ) external override isValidRevertCall(zetaRevert) {
-        (address to, uint256 token, address from) = abi.decode(
-            zetaRevert.message,
-            (address, uint256, address)
-        );
- 
-        _safeMint(from, token);
- 
-        emit CrossChainNFTRevertedEvent(to, token);
-    }
-    
-    function registerHandle(string memory username) external payable {
-        mint(msg.sender, username);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-    }
 
-    function mint(address _to, string memory username) public payable {
-        require(handleToTokenId[username] == 0, "Handle already exists");
-        require(this.balanceOf(_msgSender()) == 0, "Only one profile handle per wallet");
+        (, uint256 gasFee) = IZRC20(zrc20).withdrawGasFee();
 
-        _tokenIds++;
-        _tokenIds++;
+        IZRC20(zrc20).approve(zrc20, gasFee);
+        IZRC20(zrc20).withdraw(recipient, tokenAmounts[tokenId] - gasFee);
 
-        _safeMint(_to, _tokenIds);
-        handleToTokenId[username] = _tokenIds;
-        profileHandle[_tokenIds] = username;
-    }
-
-    function withdraw() public onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+        _burn(tokenId);
+        delete tokenAmounts[tokenId];
+        delete tokenChains[tokenId];
     }
 
     function getTokenIdsOfOwner(address owner) public view returns (uint256[] memory) {

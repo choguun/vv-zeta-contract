@@ -5,15 +5,18 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   const [signer] = await hre.ethers.getSigners();
   console.log(`🔑 Using account: ${signer.address}\n`);
 
+  /*
+    Profile:0xa3D6F8f0455250d3679C5A9d418Fb190c8FBA6e5 World:0x0673F20FAB85Fd5d7a392436086c51038a483712 Token:0x026e6C5d10fB2655f39a5B367C2Ff80af9215AC5 Vault:0x6F1C92FB8c0ebed02C0be7018B7EFCA5414f0326 Craft:0x9b989635a70C17f487617F779d3f6F324978B0cF Item:0x4Aab7FeA44E174Da739C3A4c53e6554A1018b1d3 
+  */
 
   const factory = await hre.ethers.getContractFactory("World");
-  const contract = factory.attach('0xE84e47891B28f8a29ab2f1aAAF047A361852620F');
+  const contract = factory.attach('0x0673F20FAB85Fd5d7a392436086c51038a483712');
 
-  const item = "0x93129A93974b4EbE7F11C457b47bAF1b8BBD7C64";
-  const token = "0xA3D093821e81eddaF43a6091EC308831dE9bf056";
-  const profile = "0x47A9D4613b93B3aF955C918E1379A61B7b5392B9";
-  const craft = "0xC987c9A034227C40D35E6BebaF0f9391531D2BAC";
-  const vault = "0xAF98CEB505c16dD4d7d0404104d02A5A17f7a774";
+  const item = "0x4Aab7FeA44E174Da739C3A4c53e6554A1018b1d3";
+  const token = "0x026e6C5d10fB2655f39a5B367C2Ff80af9215AC5";
+  const profile = "0xa3D6F8f0455250d3679C5A9d418Fb190c8FBA6e5";
+  const craft = "0x9b989635a70C17f487617F779d3f6F324978B0cF";
+  const vault = "0x6F1C92FB8c0ebed02C0be7018B7EFCA5414f0326";
 
   const tx1 = await contract.setProfile(profile);
   const receipt1 = await tx1.wait();
