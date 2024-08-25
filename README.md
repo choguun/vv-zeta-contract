@@ -16,6 +16,9 @@
 ### How it works:
 ![How it works](/howitwork.png "How it works")
 
+### DEMO
+https://zeta.voxelverses.xyz
+
 ### Deployed Zeta testnet
 1. World - On-chain game logic(Quest, Crafting, Raffle, Exchange, Defi) https://athens.explorer.zetachain.com/address/0xf778a16B7d27448e875C4330cf75abE6E2A1b678 
 2. Profile - NFT Profile to identify unique user https://athens.explorer.zetachain.com/address/0x464baD40aAdB6A46038250ab6E7854895040d5b5
