@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.7;
 
+
+import {SystemContract} from "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
+import {zContract, zContext} from "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
+import {BytesHelperLib} from "@zetachain/toolkit/contracts/BytesHelperLib.sol";
+import {OnlySystem, IZRC20} from "@zetachain/toolkit/contracts/OnlySystem.sol";
+import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Profile} from "./Profile.sol";
 
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
-import "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
-import "@zetachain/toolkit/contracts/BytesHelperLib.sol";
-import "@zetachain/toolkit/contracts/OnlySystem.sol";
 
 contract Token is zContract, ERC20, OnlySystem {
     SystemContract public systemContract;

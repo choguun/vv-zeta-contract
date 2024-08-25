@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.7;
 
-import "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
-import "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@zetachain/toolkit/contracts/BytesHelperLib.sol";
-import "@zetachain/toolkit/contracts/OnlySystem.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {SystemContract} from "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
+import {zContract, zContext} from "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
+import {BytesHelperLib} from "@zetachain/toolkit/contracts/BytesHelperLib.sol";
+import {OnlySystem, IZRC20} from "@zetachain/toolkit/contracts/OnlySystem.sol";
 
 contract Staking is ERC20, zContract, OnlySystem {
     SystemContract public systemContract;

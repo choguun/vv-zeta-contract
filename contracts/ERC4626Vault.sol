@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IERC4626.sol";
+import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {SystemContract} from "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
+import {zContract, zContext} from "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
+import {BytesHelperLib} from "@zetachain/toolkit/contracts/BytesHelperLib.sol";
+import {OnlySystem} from "@zetachain/toolkit/contracts/OnlySystem.sol";
 
-import "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
-import "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
-import "@zetachain/toolkit/contracts/BytesHelperLib.sol";
-import "@zetachain/toolkit/contracts/OnlySystem.sol";
+import {IERC4626} from "./IERC4626.sol";
 
 
 contract ERC4626Vault is ERC20, IERC4626, Ownable, zContract, OnlySystem {
@@ -33,7 +33,7 @@ contract ERC4626Vault is ERC20, IERC4626, Ownable, zContract, OnlySystem {
         IERC20 asset, 
         uint256 chainID_,
         address systemContractAddress
-        ) ERC20("Raffle Vault", "Raffle")
+        ) ERC20("Stake CUBE", "sCUBE")
     {
         _asset = asset;
         systemContract = SystemContract(systemContractAddress);
