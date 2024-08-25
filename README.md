@@ -12,9 +12,7 @@
 3. Real-time Open World
 4. Built-in in-game DeFi
 5. Multi-Chain supported(omnichain)
-
-### How it works:
-![How it works](/howitwork.png "How it works")
+6. Account Abstraction and Paymaster
 
 ### DEMO
 https://zeta.voxelverses.xyz
