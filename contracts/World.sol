@@ -4,13 +4,20 @@ pragma solidity ^0.8.7;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 // import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {SystemContract} from "@zetachain/protocol-contracts/contracts/zevm/SystemContract.sol";
+import {zContract, zContext} from "@zetachain/protocol-contracts/contracts/zevm/interfaces/zContract.sol";
+import {BytesHelperLib} from "@zetachain/toolkit/contracts/BytesHelperLib.sol";
+import {OnlySystem, IZRC20} from "@zetachain/toolkit/contracts/OnlySystem.sol";
+
 import {Profile} from "./Profile.sol";
 import {Token} from "./Token.sol";
 import {Item} from "./Item.sol";
+import {Potion} from "./Potion.sol";
 import {Raffle} from "./Raffle.sol";
 import {CraftSystem} from "./CraftSystem.sol";
 import {IERC4626} from "./IERC4626.sol";
-// import {ERC6551Registry} from "./ERC6551Registry.sol";
 
 contract World is Raffle, Ownable, ReentrancyGuard {
     // Data Structures
@@ -19,20 +26,22 @@ contract World is Raffle, Ownable, ReentrancyGuard {
         PLAY_MINIGAME,
         CRAFT
     }
-
     enum ExchangeType {
         BUY,
         SELL
     }
 
     struct Player {
-        uint256 tokenId;
-        uint256 score;
+        uint32 tokenId;
+        uint16 score;
+        uint8 streak;
+        uint16 ticket;
+        uint8 stamina;
+        uint8 hp;
         uint256 lastCheckIn;
-        uint256 streak;
         uint256 lastRaffle;
         uint256 lastDoCraft;
-        uint256 ticket;
+        uint256 lastResetPlayer;
     }
     struct Quest {
         string name;
@@ -52,10 +61,10 @@ contract World is Raffle, Ownable, ReentrancyGuard {
     address public token; // Token
     address public item; // Item
     address public craft; // Craft System
+    address public potion; // Potion
     address public registry; // Registry
     address public account; // Token Bound Account
     address public vault; // Vault
-    uint256 public chainId;
     // External Contract
 
     // Game data
@@ -69,6 +78,10 @@ contract World is Raffle, Ownable, ReentrancyGuard {
 
     uint256 public constant CHECK_IN_WINDOW = 24 hours;
     uint256 public constant DENOMINATOR = 10 ** 18;
+
+    uint8 public constant NORMAL_DROP = 30; // 30% Chance
+    uint8 public constant RARE_DROP = 10; // 10% Chance
+    uint8 public constant EPIC_DROP = 5; // 5% Chance 
     // Game data
 
     // Events
@@ -122,10 +135,6 @@ contract World is Raffle, Ownable, ReentrancyGuard {
         require(Profile(profile).balanceOf(_msgSender()) > 0, "Only user can call this function");
         _;
     }
-    modifier onlyTokenOwner(uint256 _tokenId) {
-        require(Profile(profile).ownerOf(_tokenId) == _msgSender(), "Only owner of the token can exchange item");
-        _;
-    }
     modifier onlyPlayer() {
         require(players[_msgSender()].tokenId > 0, "Player not found");
         _;
@@ -138,8 +147,8 @@ contract World is Raffle, Ownable, ReentrancyGuard {
     }
 
      // Player functions
-    function createPlayer(uint256 _tokenId) external onlyUser onlyTokenOwner(_tokenId) {
-        players[_msgSender()] = Player(_tokenId, 0, 0, 0, 0, 0, 0);
+    function createPlayer(uint32 _tokenId) external onlyUser {
+        players[_msgSender()] = Player(_tokenId, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         emit PlayerCreated(_tokenId, _msgSender(), block.timestamp);
     }
 
@@ -147,6 +156,61 @@ contract World is Raffle, Ownable, ReentrancyGuard {
         return players[_player];
     }
     // Player functions
+    function _resetPlayer() internal {
+        players[_msgSender()].stamina = 100;
+        players[_msgSender()].hp = 10;
+        players[_msgSender()].lastResetPlayer = block.timestamp;
+    }
+    // Player functions
+
+    // Spawn functions
+    function spawn(uint32 _tokenId) external onlyUser {
+        require(block.timestamp >=players[_msgSender()].lastResetPlayer  + CHECK_IN_WINDOW, "Too early for next reset player");
+        _resetPlayer();
+    }
+    // Spawn functions
+
+    // Mine functions
+    function _isBlockValid(uint256 x, uint256 y, uint256 z) internal view returns (bool) {
+        // TODO: add more logic to validate the block
+        return true;
+    }
+
+    function _calculateDrop(uint256 x, uint256 y, uint256 z) internal view returns (uint256) {
+        require(_isBlockValid(x, y, z), "Invalid block");
+        uint256 randomSeed = (uint256(keccak256(abi.encodePacked(block.timestamp, _msgSender(), x, y, z))) % 100);
+        uint256 drop = 0;
+        if(randomSeed < EPIC_DROP) {
+            drop = 100;
+        } else if(randomSeed < RARE_DROP) {
+            drop = 50;
+        } else if(randomSeed < NORMAL_DROP) {
+            drop = 10;
+        }
+        return drop;
+    }
+
+    function mine(uint32 _tokenId, uint256 x, uint256 y, uint256 z) external onlyUser {
+        require(_isBlockValid(x, y, z), "Invalid block");
+        require(players[_msgSender()].stamina > 0, "Not enough stamina");
+        players[_msgSender()].stamina -= 1;
+        uint256 drop = _calculateDrop(x, y, z);
+        _distributeRewardandScore(_tokenId, drop);
+    }
+    // Mine functions
+
+    // consumePotion functions
+    function consumePotion(uint32 _tokenId, uint256 _potionId) external onlyUser {
+        // address tokenBoundAccount = _getTokenBoundAccount(_tokenId);
+        require(Potion(potion).balanceOf(_msgSender(), _potionId) > 0, "Potion Token is not enough to consume potion");
+        Potion(potion).burn(_msgSender(), _potionId, 1);
+        if(_potionId == 0) {
+            players[_msgSender()].stamina += 10;
+        } else {
+            players[_msgSender()].hp += 1;
+        }
+    }
+    // consumePotion functions
 
     // Market functions
     function setMarketFees(uint256 fees) external onlyOwner {
@@ -157,7 +221,7 @@ contract World is Raffle, Ownable, ReentrancyGuard {
     // Market functions
 
     // Exchange functions
-    function exchangeItem(uint256 _tokenId, uint256 _itemId, ExchangeType exchangeType) external onlyUser onlyTokenOwner(_tokenId) nonReentrant {
+    function exchangeItem(uint256 _tokenId, uint256 _itemId, ExchangeType exchangeType) external onlyUser nonReentrant {
         uint256 price = _getItemPrice(_itemId);
 
         if(exchangeType == ExchangeType.BUY) {
@@ -179,7 +243,7 @@ contract World is Raffle, Ownable, ReentrancyGuard {
     // Exchange functions
 
     // Quest functions
-    function doQuest(uint256 _tokenId, uint256 _questId, uint256 _data) external onlyUser onlyTokenOwner(_tokenId) {
+    function doQuest(uint256 _tokenId, uint256 _questId, uint256 _data) external onlyUser {
         if(quests[_questId].questType == QuestType.DAILY_CHECK_IN) {
             // Quest 1: Daily check-in
             _dailyCheckIn(_tokenId, quests[_questId].reward);
@@ -195,7 +259,7 @@ contract World is Raffle, Ownable, ReentrancyGuard {
         }
     }
 
-    function doDeposit(uint256 _tokenId, uint256 _amount) external onlyUser onlyTokenOwner(_tokenId) {
+    function doDeposit(uint256 _tokenId, uint256 _amount) external onlyUser {
         require(_amount > 0, "Amount must be greater than 0");
         require(Token(token).transferFrom(_msgSender(), address(this), _amount), "Transfer failed");
         // Approve the vault to spend the asset on behalf of the World contract
@@ -280,12 +344,6 @@ contract World is Raffle, Ownable, ReentrancyGuard {
     }
     // Quest functions
 
-    // Helper functions
-    // function _getTokenBoundAccount(uint256 _tokenId) internal view returns (address) {
-    //     return ERC6551Registry(registry).account(account, chainId, profile, _tokenId, 1);
-    // }
-    // Helper functions
-
     // Admin functions
     // config world
     function setProfile(address _profile) public onlyOwner {
@@ -306,12 +364,6 @@ contract World is Raffle, Ownable, ReentrancyGuard {
 
     function setVault(address _vault) public onlyOwner {
         vault = _vault;
-    }
-
-    function configTokenBound(address _registry, address _account, uint256 _chainId) public onlyOwner {
-        registry = _registry;
-        account = _account;
-        chainId = _chainId;
     }
     // config world
 
