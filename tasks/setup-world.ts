@@ -6,17 +6,18 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   console.log(`🔑 Using account: ${signer.address}\n`);
 
   /*
-    Profile:0xa3D6F8f0455250d3679C5A9d418Fb190c8FBA6e5 World:0x0673F20FAB85Fd5d7a392436086c51038a483712 Token:0x026e6C5d10fB2655f39a5B367C2Ff80af9215AC5 Vault:0x6F1C92FB8c0ebed02C0be7018B7EFCA5414f0326 Craft:0x9b989635a70C17f487617F779d3f6F324978B0cF Item:0x4Aab7FeA44E174Da739C3A4c53e6554A1018b1d3 
+    Profile:0x464baD40aAdB6A46038250ab6E7854895040d5b5 World:0xf778a16B7d27448e875C4330cf75abE6E2A1b678 Token:0xaaD8c8f1CD8432f870972fcec109B3beFF2Af0E6 Vault:0x044b20F8a1Bd0e0862aa94a0836898bf09a84c34 Craft:0x28be7AF55E21BbD21Bea65537Fc7535450e10f3B Item:0xBe20C660f29664C138819c9DB3B235490A8af6Ec Potion:0x93288d1e46C2FE7515E6F532E86C1e3Ac982F9f9
   */
 
   const factory = await hre.ethers.getContractFactory("World");
-  const contract = factory.attach('0x0673F20FAB85Fd5d7a392436086c51038a483712');
+  const contract = factory.attach('0xf778a16B7d27448e875C4330cf75abE6E2A1b678');
 
-  const item = "0x4Aab7FeA44E174Da739C3A4c53e6554A1018b1d3";
-  const token = "0x026e6C5d10fB2655f39a5B367C2Ff80af9215AC5";
-  const profile = "0xa3D6F8f0455250d3679C5A9d418Fb190c8FBA6e5";
-  const craft = "0x9b989635a70C17f487617F779d3f6F324978B0cF";
-  const vault = "0x6F1C92FB8c0ebed02C0be7018B7EFCA5414f0326";
+  const item = "0xBe20C660f29664C138819c9DB3B235490A8af6Ec";
+  const token = "0xaaD8c8f1CD8432f870972fcec109B3beFF2Af0E6";
+  const profile = "0x464baD40aAdB6A46038250ab6E7854895040d5b5";
+  const craft = "0x28be7AF55E21BbD21Bea65537Fc7535450e10f3B";
+  const vault = "0x044b20F8a1Bd0e0862aa94a0836898bf09a84c34";
+  const potion = "0x93288d1e46C2FE7515E6F532E86C1e3Ac982F9f9";
 
   const tx1 = await contract.setProfile(profile);
   const receipt1 = await tx1.wait();
@@ -44,6 +45,10 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   const tx6 = await deployedCraftContract.setItem(item);
   const receipt6 = await tx6.wait();
   console.log(receipt6);
+
+  const tx7 = await contract.setPotion(potion);
+  const receipt7 = await tx7.wait();
+  console.log(receipt7);
 
   console.log('======================== DONE ========================');
 };

@@ -3,6 +3,7 @@ import "./tasks/setup-world";
 import "./tasks/add-quest";
 import "./tasks/add-recipe";
 import "./tasks/add-gameitem";
+import "./tasks/check-player";
 import "@nomicfoundation/hardhat-toolbox";
 import "@zetachain/toolkit/tasks";
 
@@ -13,7 +14,15 @@ const config: HardhatUserConfig = {
   networks: {
     ...getHardhatConfigNetworks(),
   },
-  solidity: "0.8.7",
+  solidity: {
+    version: "0.8.7",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 999,
+      },
+    },
+  },
 };
 
 export default config;

@@ -7,7 +7,7 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
 
 
   const factory = await hre.ethers.getContractFactory("World");
-  const contract = factory.attach('0x0673F20FAB85Fd5d7a392436086c51038a483712');
+  const contract = factory.attach('0xf778a16B7d27448e875C4330cf75abE6E2A1b678');
 
   const tx4 = await contract.addItems(0, 0);
   const receipt4 = await tx4.wait();

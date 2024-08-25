@@ -17,9 +17,10 @@
 ![How it works](/howitwork.png "How it works")
 
 ### Deployed Zeta testnet
-1. World - On-chain game logic(Quest, Crafting, Raffle, Exchange, Defi) https://athens.explorer.zetachain.com/address/0xE84e47891B28f8a29ab2f1aAAF047A361852620F 
-2. Profile - NFT Profile to identify unique user https://athens.explorer.zetachain.com/address/0x47A9D4613b93B3aF955C918E1379A61B7b5392B9
-3. Token - ERC20 In-game token https://athens.explorer.zetachain.com/address/0xA3D093821e81eddaF43a6091EC308831dE9bf056
-4. Item - ERC1155 game item https://athens.explorer.zetachain.com/address/0x93129A93974b4EbE7F11C457b47bAF1b8BBD7C64
-5. Crafting System - https://athens.explorer.zetachain.com/address/0xC987c9A034227C40D35E6BebaF0f9391531D2BAC
-6. Vault - ERC4626 Vault https://athens.explorer.zetachain.com/address/0xAF98CEB505c16dD4d7d0404104d02A5A17f7a774
+1. World - On-chain game logic(Quest, Crafting, Raffle, Exchange, Defi) https://athens.explorer.zetachain.com/address/0xf778a16B7d27448e875C4330cf75abE6E2A1b678 
+2. Profile - NFT Profile to identify unique user https://athens.explorer.zetachain.com/address/0x464baD40aAdB6A46038250ab6E7854895040d5b5
+3. Token - ERC20 In-game token https://athens.explorer.zetachain.com/address/0xaaD8c8f1CD8432f870972fcec109B3beFF2Af0E6
+4. Item - ERC1155 game item https://athens.explorer.zetachain.com/address/0xBe20C660f29664C138819c9DB3B235490A8af6Ec
+5. Crafting System - https://athens.explorer.zetachain.com/address/0x28be7AF55E21BbD21Bea65537Fc7535450e10f3B
+6. Vault - ERC4626 Vault https://athens.explorer.zetachain.com/address/0x044b20F8a1Bd0e0862aa94a0836898bf09a84c34
+7. Potion - ERC1155 game potion https://athens.explorer.zetachain.com/address/0x93288d1e46C2FE7515E6F532E86C1e3Ac982F9f9

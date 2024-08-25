@@ -34,23 +34,10 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
     }
   }
 
-  // const contract = await factory.deploy(
-  //   `Staking rewards for ${symbol}`,
-  //   `R${symbol.toUpperCase()}`,
-  //   chainID,
-  //   systemContract
-  // );
-  // await contract.deployed();
-
   const owner = await signer.getAddress();
 
   const factory2 = await hre.ethers.getContractFactory("Profile");
-  /*
-         address connectorAddress, // 0x3963341dad121c9CD33046089395D66eBF20Fb03
-        address zetaTokenAddress, // 0x0000c304D2934c00Db1d51995b9f6996AffD17c0
-        address zetaConsumerAddress, // 0x301ED39771d8f1dD0b05F8C2D4327ce9C426E783
-        bool useEven
-  */
+
   const contract2 = await factory2.deploy(
     `${systemContract}`
   );
@@ -62,20 +49,8 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   );
   await contract3.deployed();
 
-  /*
-      address _world, 
-        address _profile,
-        address connectorAddress,
-        address zetaTokenAddress,
-        address zetaConsumerAddress
-  */
-
   const factory4 = await hre.ethers.getContractFactory("Token");
-    /*    address connectorAddress, // 0x3963341dad121c9CD33046089395D66eBF20Fb03
-        address zetaTokenAddress, // 0x0000c304D2934c00Db1d51995b9f6996AffD17c0
-        address zetaConsumerAddress, // 0x301ED39771d8f1dD0b05F8C2D4327ce9C426E783
-        bool useEven
-  */
+ 
   const contract4 = await factory4.deploy(
     `${contract3.address}`,
     `${contract2.address}`,
@@ -103,7 +78,6 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   );
   await contract6.deployed();
 
-
   /*
   address _world, address _craft, string memory _itemURI
   */
@@ -115,18 +89,15 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   );
   await contract7.deployed();
 
-  console.log(`Profile:${contract2.address} World:${contract3.address} Token:${contract4.address} Vault:${contract5.address} Craft:${contract6.address} Item:${contract7.address} `);
+  const factory8 = await hre.ethers.getContractFactory("Potion");
+  const contract8 = await factory8.deploy(
+    `${contract3.address}`,
+    `${contract6.address}`,
+    ""
+  );
+  await contract8.deployed();
 
-//   if (args.json) {
-//     console.log(JSON.stringify(contract));
-//   } else {
-//     console.log(`🔑 Using account: ${signer.address}
-
-// 🚀 Successfully deployed contract on ZetaChain.
-// 📜 Contract address: ${contract.address}
-// 🌍 Explorer: https://athens3.explorer.zetachain.com/address/${contract.address}
-// `);
-//   }
+  console.log(`Profile:${contract2.address} World:${contract3.address} Token:${contract4.address} Vault:${contract5.address} Craft:${contract6.address} Item:${contract7.address} Potion:${contract8.address}`);
 };
 
 task("deploy", "Deploy the contract", main)

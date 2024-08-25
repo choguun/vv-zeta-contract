@@ -358,6 +358,10 @@ contract World is Raffle, Ownable, ReentrancyGuard {
         item = _item;
     }
 
+    function setPotion(address _potion) public onlyOwner {
+        potion = _potion;
+    }
+
     function setCraft(address _craft) public onlyOwner {
         craft = _craft;
     }
