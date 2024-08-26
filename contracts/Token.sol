@@ -60,9 +60,6 @@ contract Token is zContract, ERC20, OnlySystem {
     }
 
     function burnToken(bytes calldata recipient, uint256 amount) public {
-        // if (!_isApprovedOrOwner(_msgSender(), tokenId)) {
-        //     revert CallerNotOwnerNotApproved();
-        // }
         address zrc20 = systemContract.gasCoinZRC20ByChainId(
             tokenChains[msg.sender]
         );
