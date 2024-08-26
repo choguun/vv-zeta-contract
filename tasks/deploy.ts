@@ -97,7 +97,22 @@ const main = async (args: any, hre: HardhatRuntimeEnvironment) => {
   );
   await contract8.deployed();
 
-  console.log(`Profile:${contract2.address} World:${contract3.address} Token:${contract4.address} Vault:${contract5.address} Craft:${contract6.address} Item:${contract7.address} Potion:${contract8.address}`);
+  const factory9 = await hre.ethers.getContractFactory("SwapToAnyToken");
+  const contract9 = await factory9.deploy(
+    `${systemContract}`
+  );
+  await contract9.deployed();
+
+  const factory10 = await hre.ethers.getContractFactory("Item2");
+  const contract10 = await factory10.deploy(
+    `${contract3.address}`,
+    `${contract2.address}`,
+    "",
+    `${systemContract}`
+  );
+  await contract10.deployed();
+
+  console.log(`Profile:${contract2.address} World:${contract3.address} Token:${contract4.address} Vault:${contract5.address} Craft:${contract6.address} Item:${contract7.address} Potion:${contract8.address} SwapAnytoken:${contract9.address} Item2:${contract10.address}`);
 };
 
 task("deploy", "Deploy the contract", main)
