@@ -25,5 +25,5 @@ https://zeta.voxelverses.xyz
 5. Crafting System - https://athens.explorer.zetachain.com/address/0x28be7AF55E21BbD21Bea65537Fc7535450e10f3B
 6. Vault - ERC4626 Vault https://athens.explorer.zetachain.com/address/0x044b20F8a1Bd0e0862aa94a0836898bf09a84c34
 7. Potion - ERC1155 game potion https://athens.explorer.zetachain.com/address/0x93288d1e46C2FE7515E6F532E86C1e3Ac982F9f9
-8. Item - POC Omnichain ERC1155 https://athens.explorer.zetachain.com/address/0x44350519f96a2EbbF295Cfc548c674f32d26323e
+8. Item2 - POC Omnichain ERC1155 https://athens.explorer.zetachain.com/address/0x44350519f96a2EbbF295Cfc548c674f32d26323e
 9. SwapToAnyToken - https://athens.explorer.zetachain.com/address/0xD710AC68E9Ed53fc898f24f07bc23886e107FD0B
